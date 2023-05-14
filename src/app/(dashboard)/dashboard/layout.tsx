@@ -1,7 +1,9 @@
+import FriendRequestsSidebarOption from "@/components/FriendRequestsSidebarOption";
 import { Icon, Icons } from "@/components/Icons";
 import SignOutButton from "@/components/SignOutButton";
+import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
+import { User, getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,6 +32,14 @@ const sidebarOptions: SidebarOption[] = [
 const layout = async ({ children }: layoutProps) => {
     const session = await getServerSession(authOptions);
     if (!session) notFound();
+
+    const unseenRequestCount = (
+        (await fetchRedis(
+            "smembers",
+            `user:${session.user.id}:incoming_friend_requests`
+        )) as User[]
+    ).length;
+
     return (
         <div className="w-full flex h-screen">
             <div className="flex h-full w-full max-w-xs flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
@@ -70,6 +80,14 @@ const layout = async ({ children }: layoutProps) => {
                                 })}
                             </ul>
                         </li>
+
+                        <li>
+                            <FriendRequestsSidebarOption
+                                sessionId={session.user.id}
+                                initialUnseenRequestCount={unseenRequestCount}
+                            />
+                        </li>
+
                         <li className="-mx-6 mt-auto flex items-center">
                             <div className="flex flex-1 items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900">
                                 <div className="relative h-8 w-8 bg-grap-50">
@@ -83,8 +101,15 @@ const layout = async ({ children }: layoutProps) => {
                                 </div>
                                 <span className="sr-only">Your Profile</span>
                                 <div className="flex flex-col">
-                                    <span aria-hidden="true">{session.user.name}</span>
-                                    <span className="text-xs text-zinc-400" aria-hidden="true">{session.user.email}</span>
+                                    <span aria-hidden="true">
+                                        {session.user.name}
+                                    </span>
+                                    <span
+                                        className="text-xs text-zinc-400"
+                                        aria-hidden="true"
+                                    >
+                                        {session.user.email}
+                                    </span>
                                 </div>
                             </div>
                             <SignOutButton className="h-full aspect-square" />

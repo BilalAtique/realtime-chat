@@ -1,6 +1,6 @@
 interface User {
-    name: String
-    email: String
+    name: string
+    email: string
     image: string
     id: string
 }
