@@ -38,7 +38,7 @@ export async function POST(req: Request) {
             idToAdd
         );
 
-        return new Response("ok");
+        return new Response("Ok");
     } catch (error) {
         console.log(error);
         if (error instanceof z.ZodError)
