@@ -9,17 +9,6 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { email: emailToAdd } = addFriendValidator.parse(body.email);
-        // const RESTResponse = await fetch(
-        //     `${process.env.UPSTASH_REDIS_REST_URL}/get/user:email:${emailToAdd}`,
-        //     {
-        //         headers: {
-        //             Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
-        //         },
-        //         cache: "no-store",
-        //     }
-        // );
-        // const data = (await RESTResponse.json()) as { result: string };
-        // const idToAdd = data.result;
         const idToAdd = (await fetchRedis(
             "get",
             `user:email:${emailToAdd}`
@@ -65,6 +54,7 @@ export async function POST(req: Request) {
         db.sadd(`user:${idToAdd}:incoming_friend_requests`, session.user.id);
         return new Response("OK");
     } catch (error) {
+        console.log(error)
         if (error instanceof z.ZodError)
             return new Response("Invalid request payload", { status: 422 });
         return new Response("Invalid request", { status: 400 });
