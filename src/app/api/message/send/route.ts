@@ -1,6 +1,8 @@
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 import { Message, messageValidator } from "@/lib/validations/message";
 import { nanoid } from "nanoid";
 import { getServerSession } from "next-auth";
@@ -46,6 +48,9 @@ export async function POST(req: Request) {
 
         const message = messageValidator.parse(messageDate);
 
+        //Notify all connected chat room clients
+        pusherServer.trigger(toPusherKey(`chat:${chatId}`), 'incoming_message', message)
+
         // All valid, send the message
         await db.zadd(`chat:${chatId}:messages`, {
             score: timestamp,
@@ -57,6 +62,6 @@ export async function POST(req: Request) {
         if (error instanceof Error)
             return new Response(error.message, { status: 500 });
 
-        return new Response("Internel Server Errorgit ", { status: 500 });
+        return new Response("Internel Server Error", { status: 500 });
     }
 }
