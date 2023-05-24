@@ -61,7 +61,10 @@ const layout = async ({ children }: layoutProps) => {
                 <nav className="flex flex-1 flex-col">
                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
                         <li>
-                            <SidebarChatList sessionId={session.user.id} friends={friends} />
+                            <SidebarChatList
+                                sessionId={session.user.id}
+                                friends={friends}
+                            />
                         </li>
                         <li>
                             <div className="text-xs font-semibold leading-6 text-gray-400">
@@ -126,7 +129,7 @@ const layout = async ({ children }: layoutProps) => {
                     </ul>
                 </nav>
             </div>
-            {children}
+            <aside className="max-h-screen container py-16 md:py:12 w-full">{children}</aside>
         </div>
     );
 };
